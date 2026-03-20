@@ -1,0 +1,119 @@
+# ============================================================
+# Kualitee Automation CI/CD Pipeline
+# ============================================================
+# This workflow runs your Cucumber + Playwright tests
+# automatically on every push/PR to main/master.
+#
+# Two jobs run IN PARALLEL:
+#   1. web-tests   → Cucumber web tests (headless Chrome)
+#   2. api-tests   → Cucumber API tests
+#
+# Reports are uploaded as downloadable artifacts.
+# ============================================================
+
+name: Kualitee Automation CI
+
+# ── TRIGGERS ────────────────────────────────────────────────
+# When should this pipeline run?
+on:
+  push:
+    branches: [main, master]        # On every push to main/master
+  pull_request:
+    branches: [main, master]        # On every PR targeting main/master
+  workflow_dispatch:                 # Manual trigger from GitHub Actions UI
+
+# ── ENVIRONMENT VARIABLES ──────────────────────────────────
+# These come from GitHub Secrets (never hardcoded!)
+# Set them in: GitHub → Settings → Secrets → Actions
+env:
+  API_BASE_URL: ${{ secrets.API_BASE_URL }}
+  TEST_USER: ${{ secrets.TEST_USER }}
+  TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+
+# ── JOBS ───────────────────────────────────────────────────
+jobs:
+
+  # ╔═══════════════════════════════════════════════════════╗
+  # ║  JOB 1: WEB TESTS (Cucumber + Playwright + Chrome)   ║
+  # ╚═══════════════════════════════════════════════════════╝
+  web-tests:
+    name: 🌐 Web Tests (Chrome)
+    runs-on: ubuntu-latest           # Free GitHub-hosted Linux VM
+    timeout-minutes: 30              # Kill job if stuck for 30 min
+
+    steps:
+      # 1. Clone the repo
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'               # Cache node_modules between runs
+
+      # 3. Install project dependencies
+      - name: Install dependencies
+        run: npm ci                  # Clean install from lockfile
+
+      # 4. Install Chromium browser for Playwright
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      # 5. Run the Cucumber web tests in headless mode
+      - name: Run Web Tests
+        run: npx cross-env BROWSER=chrome cucumber-js -p default --tags "not @skip"
+        env:
+          HEADLESS: "true"           # No visible browser in CI
+
+      # 6. Upload Allure results (even if tests fail)
+      - name: Upload Allure Results
+        uses: actions/upload-artifact@v4
+        if: always()                 # Upload even on failure
+        with:
+          name: allure-results-web
+          path: allure-results/
+          retention-days: 14
+
+      # 7. Upload Cucumber HTML report
+      - name: Upload Cucumber Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cucumber-report-web
+          path: cucumber-report.html
+          retention-days: 14
+
+  # ╔═══════════════════════════════════════════════════════╗
+  # ║  JOB 2: API TESTS (Cucumber + HTTP requests)         ║
+  # ╚═══════════════════════════════════════════════════════╝
+  api-tests:
+    name: 🔌 API Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15              # API tests are fast
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # API tests don't need a browser, so no Playwright install needed
+      - name: Run API Tests
+        run: npx cross-env PLATFORM=api cucumber-js -p api
+
+      - name: Upload Allure Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results-api
+          path: allure-results/
+          retention-days: 14

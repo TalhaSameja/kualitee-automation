@@ -1,0 +1,7 @@
+{
+  "smokeTest": {
+    "name": "Smoke: Login & Create",
+    "summary": "Critical path verification for deployment.",
+    "status": "Approved"
+  }
+}

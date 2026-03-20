@@ -1,0 +1,12 @@
+{
+  "validUser": {
+    "email": "emilys",
+    "username": "emilys",
+    "password": "emilyspass"
+  },
+  "invalidUser": {
+    "email": "wronguser",
+    "username": "wronguser",
+    "password": "wrongpassword"
+  }
+}
