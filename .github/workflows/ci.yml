@@ -117,3 +117,67 @@ jobs:
           name: allure-results-api
           path: allure-results/
           retention-days: 14
+
+  # ╔═══════════════════════════════════════════════════════╗
+  # ║  JOB 3: MOBILE TESTS (Android Emulator + Appium)      ║
+  # ╚═══════════════════════════════════════════════════════╝
+  mobile-tests:
+    name: 📱 Mobile Tests (Android)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45              # Emulators are slow to boot
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Hardware acceleration (KVM) is required for usable emulator speed
+      - name: Enable KVM group permissions
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run Android Emulator and Tests
+        uses: reactive-circuits/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 6
+          script: |
+            # Start Appium in background
+            npx appium --log-level info > appium.log 2>&1 &
+            
+            # Wait for Appium to start (port 4723)
+            echo "Waiting for Appium to settle..."
+            sleep 15
+            
+            # Run mobile tests
+            npm run test:mobile
+        env:
+          HEADLESS: "true"
+
+      - name: Upload Allure Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results-mobile
+          path: allure-results/
+          retention-days: 14
+
+      - name: Upload Cucumber Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cucumber-report-mobile
+          path: cucumber-report.html
+          retention-days: 14
