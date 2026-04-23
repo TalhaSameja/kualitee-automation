@@ -12,7 +12,8 @@ module.exports = {
     // 4. Formats: 
     format: [
       'progress-bar',
-      'allure-cucumberjs/reporter'
+      'allure-cucumberjs/reporter',
+      'html:cucumber-report.html'
     ],
 
     // 5. Configuration for Allure
@@ -24,14 +25,14 @@ module.exports = {
     paths: ['features/mobile/**/*.feature'],
     require: ['src/support/**/*.ts', 'src/steps/**/*.ts'],
     requireModule: ['ts-node/register'],
-    format: ['progress-bar', 'allure-cucumberjs/reporter'],
+    format: ['progress-bar', 'allure-cucumberjs/reporter', 'html:cucumber-report.html'],
     formatOptions: { resultsDir: 'allure-results' }
   },
   api: {
     paths: ['features/api/**/*.feature'],
     require: ['src/support/**/*.ts', 'src/steps/**/*.ts'],
     requireModule: ['ts-node/register'],
-    format: ['progress-bar', 'allure-cucumberjs/reporter'],
+    format: ['progress-bar', 'allure-cucumberjs/reporter', 'html:cucumber-report.html'],
     formatOptions: { resultsDir: 'allure-results' }
   }
 };

@@ -68,10 +68,21 @@ export class TestDataManager {
 
     /**
      * Get user credentials data.
-     * Source: data/users.json
+     * Source: data/users.json, overridden by TEST_USER / TEST_PASSWORD env vars.
      */
     static getUsers(): UsersData {
-        return this.readDataFile<UsersData>('users.json');
+        const users = this.readDataFile<UsersData>('users.json');
+        
+        // Override with environment variables for CI
+        if (process.env.TEST_USER) {
+            users.validUser.email = process.env.TEST_USER;
+            users.validUser.username = process.env.TEST_USER;
+        }
+        if (process.env.TEST_PASSWORD) {
+            users.validUser.password = process.env.TEST_PASSWORD;
+        }
+        
+        return users;
     }
 
     /**
