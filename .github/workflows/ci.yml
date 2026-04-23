@@ -51,11 +51,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'               # Cache node_modules between runs
 
       # 3. Install project dependencies
       - name: Install dependencies
-        run: npm ci                  # Clean install from lockfile
+        run: npm install
 
       # 4. Install Chromium browser for Playwright
       - name: Install Playwright Browsers
@@ -101,10 +100,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       # API tests don't need a browser, so no Playwright install needed
       - name: Run API Tests
@@ -134,10 +132,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       # Hardware acceleration (KVM) is required for usable emulator speed
       - name: Enable KVM group permissions
