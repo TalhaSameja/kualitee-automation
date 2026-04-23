@@ -4,6 +4,12 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+
+env:
+  # These come from GitHub Secrets
+  TEST_USER: ${{ secrets.TEST_USER }}
+  TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+
 jobs:
   test:
     timeout-minutes: 60
@@ -12,13 +18,13 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: lts/*
+        node-version: 20
     - name: Install dependencies
       run: npm install
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      run: npx playwright install --with-deps chromium
     - name: Run Playwright tests
-      run: npx playwright test
+      run: npx playwright test --project=chrome
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

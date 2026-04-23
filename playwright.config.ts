@@ -17,7 +17,7 @@ export default defineConfig({
     // 1. Run only on Desktop Chrome by default
     ...devices['Desktop Chrome'], 
     trace: 'on-first-retry',
-    headless: false, // Keep browser visible so you can see what happens
+    headless: !!process.env.CI, // Headed locally for debugging, headless in CI
     screenshot: 'only-on-failure',
   },
 

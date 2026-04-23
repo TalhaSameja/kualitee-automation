@@ -104,7 +104,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # API tests don't need a browser, so no Playwright install needed
+      # ApiClient uses Playwright's request API, so Playwright must be installed
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
       - name: Run API Tests
         run: npx cross-env PLATFORM=api cucumber-js -p api
 
@@ -118,9 +121,11 @@ jobs:
 
   # ╔═══════════════════════════════════════════════════════╗
   # ║  JOB 3: MOBILE TESTS (Android Emulator + Appium)      ║
+  # ║  Only runs manually — requires APK and emulator setup  ║
   # ╚═══════════════════════════════════════════════════════╝
   mobile-tests:
     name: 📱 Mobile Tests (Android)
+    if: github.event_name == 'workflow_dispatch'  # Manual trigger only
     runs-on: ubuntu-latest
     timeout-minutes: 45              # Emulators are slow to boot
 
