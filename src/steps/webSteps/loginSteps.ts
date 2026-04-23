@@ -1,8 +1,8 @@
 import { Given, When, Then } from '@cucumber/cucumber';
-import { page } from '../../hooks';
-import { LoginPage } from '../../../../src/pages/web/LoginPage';
-import { DashboardPage } from '../../../../src/pages/web/DashboardPage';
-import userData from '../../../../data/users.json';
+import { page } from '../../support/hooks';
+import { LoginPage } from '../../pages/web/LoginPage';
+import { DashboardPage } from '../../pages/web/DashboardPage';
+import { TestDataManager } from '../../common/TestDataManager';
 
 let loginPage: LoginPage;
 let dashboardPage: DashboardPage;
@@ -14,11 +14,13 @@ Given('I am on the login page', async () => {
 });
 
 When('I login with valid credentials', async () => {
-    await loginPage.login(userData.validUser.email, userData.validUser.password);
+    const users = TestDataManager.getUsers();
+    await loginPage.login(users.validUser.email, users.validUser.password);
 });
 
 When('I login with invalid credentials', async () => {
-    await loginPage.login(userData.invalidUser.email, userData.invalidUser.password);
+    const users = TestDataManager.getUsers();
+    await loginPage.login(users.invalidUser.email, users.invalidUser.password);
 });
 
 Then('I should be redirected to the dashboard page', async () => {
@@ -36,8 +38,9 @@ Given('I am logged in to the application', async () => {
     let dashboardPage = new DashboardPage(page);
 
     // 2. Perform Login Flow
+    const users = TestDataManager.getUsers();
     await loginPage.navigate();
-    await loginPage.login(userData.validUser.email, userData.validUser.password);
+    await loginPage.login(users.validUser.email, users.validUser.password);
 
     // 3. Verify we made it to the dashboard
     await dashboardPage.verifyLoaded();

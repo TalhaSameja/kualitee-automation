@@ -3,8 +3,9 @@ import { Before, After, BeforeAll, AfterAll, setDefaultTimeout, Status } from '@
 import { chromium, firefox, webkit, Browser, Page, BrowserContext } from '@playwright/test';
 import { remote } from 'webdriverio';
 import { appiumConfig } from '../../config/appium.config';
-import fs from 'fs';
-import path from 'path';
+import { ENV } from '../config/environments';
+import { takeScreenshot } from '../pages/web/common/WebHelpers';
+import { takeMobileScreenshot } from '../pages/mobile/common/MobileHelpers';
 
 setDefaultTimeout(60 * 1000);
 
@@ -18,15 +19,15 @@ export let driver: WebdriverIO.Browser;
 
 BeforeAll({ timeout: 120 * 1000 }, async () => {
     const platform = process.env.PLATFORM || 'web';
-    console.log(`Executing tests for platform: ${platform}`);
+    console.log(`[Hooks] Platform: ${platform} | Environment: ${ENV.name}`);
+    console.log(`[Hooks] Base URL: ${ENV.baseUrl}`);
 
     if (platform === 'web') {
         const browserType = process.env.BROWSER || 'chrome';
-        const isCI = process.env.CI === 'true';
 
         const launchOptions = {
-            headless: isCI ? true : false,
-            args: (browserType === 'chrome' && !isCI) ? ['--start-maximized'] : []
+            headless: ENV.isCI ? true : false,
+            args: (browserType === 'chrome' && !ENV.isCI) ? ['--start-maximized'] : []
         };
 
         switch (browserType) {
@@ -73,24 +74,16 @@ After(async function (scenario) {
 
     if (platform === 'web' && page) {
         if (scenario.result?.status === Status.FAILED) {
-            const screenshot = await page.screenshot({ fullPage: true });
-            this.attach(screenshot, 'image/png');
-
             const screenshotName = scenario.pickle.name.replace(/[^a-z0-9]/gi, '_');
-            const screenshotPath = path.join('test-results', 'screenshots', `${screenshotName}.png`);
-
-            const dir = path.dirname(screenshotPath);
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-
-            await page.screenshot({ path: screenshotPath, fullPage: true });
+            const screenshot = await takeScreenshot(page, screenshotName);
+            this.attach(screenshot, 'image/png');
         }
         await page.close();
         await context.close();
     } else if (platform === 'mobile' && driver) {
         if (scenario.result?.status === Status.FAILED) {
-            const screenshot = await driver.takeScreenshot();
+            const screenshotName = scenario.pickle.name.replace(/[^a-z0-9]/gi, '_');
+            const screenshot = await takeMobileScreenshot(driver, screenshotName);
             this.attach(Buffer.from(screenshot, 'base64'), 'image/png');
         }
     }

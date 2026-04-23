@@ -1,35 +1,36 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
+import { LoginLocators } from './locators/LoginLocators';
 
-export class LoginPage {
-    readonly page: Page;
-    readonly emailInput: Locator;
-    readonly passwordInput: Locator;
-    readonly loginButton: Locator;
-    readonly errorMessage: Locator;
+/**
+ * Login Page
+ * 
+ * Page object for the Login page. Extends BasePage for
+ * navigation and common helpers. Uses LoginLocators for
+ * centralized selector management.
+ */
+export class LoginPage extends BasePage {
+    private readonly locators: LoginLocators;
 
     constructor(page: Page) {
-        this.page = page;
-        this.emailInput = page.getByRole('textbox', { name: 'Email' });
-        this.passwordInput = page.locator('input[type="password"], input[name="password"]');
-        this.loginButton = page.getByRole('button', { name: 'Log in' });
-        
-        this.errorMessage = page.getByText('Email must be a valid email')
-                                .or(page.locator('.toast-message'))
-                                .or(page.getByText('Invalid user name or password'));
+        super(page);
+        this.locators = new LoginLocators(page);
     }
 
     async navigate() {
-        await this.page.goto(process.env.BASE_URL || 'https://kualitee-oi-uat.kualiteestaging.com/');
+        await super.navigate();
     }
 
     async login(username: string, pass: string) {
-        await this.emailInput.waitFor({ state: 'visible' });
-        await this.emailInput.fill(username);
-        await this.passwordInput.fill(pass);
-        await this.loginButton.click();
+        await this.locators.emailInput.waitFor({ state: 'visible', timeout: 15000 });
+
+        await this.safeFill(this.locators.emailInput, username);
+        await this.safeFill(this.locators.passwordInput, pass);
+
+        await this.locators.loginButton.click();
     }
 
     async verifyErrorVisible() {
-        await expect(this.errorMessage.first()).toBeVisible({ timeout: 5000 });
+        await expect(this.locators.errorMessage.first()).toBeVisible({ timeout: 5000 });
     }
-}       
+}

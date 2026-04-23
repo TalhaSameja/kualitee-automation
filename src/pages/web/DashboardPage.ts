@@ -1,17 +1,23 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
+import { DashboardLocators } from './locators/DashboardLocators';
 
-export class DashboardPage {
-    readonly page: Page;
-    readonly dashboardText: Locator;
+/**
+ * Dashboard Page
+ * 
+ * Page object for the Dashboard page. Extends BasePage
+ * and uses DashboardLocators for selector management.
+ */
+export class DashboardPage extends BasePage {
+    private readonly locators: DashboardLocators;
 
     constructor(page: Page) {
-        this.page = page;
-        this.dashboardText = page.locator('h1, h2, .main-header').or(page.getByText('Dashboard', { exact: false })).first();
+        super(page);
+        this.locators = new DashboardLocators(page);
     }
 
     async verifyLoaded() {
         await expect(this.page).toHaveURL(/.*dashboard/, { timeout: 15000 });
-
-        await expect(this.dashboardText).toBeVisible({ timeout: 10000 });
+        await expect(this.locators.dashboardText).toBeVisible({ timeout: 10000 });
     }
 }

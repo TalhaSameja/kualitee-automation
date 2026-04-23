@@ -1,11 +1,11 @@
 {
   "validUser": {
-    "email": "emilys",
-    "username": "emilys",
-    "password": "emilyspass"
+    "email": "kualitee.performance+1@gmail.com",
+    "username": "kualitee.performance+1@gmail.com",
+    "password": "Tm3c8GMBT"
   },
   "invalidUser": {
-    "email": "wronguser",
+    "email": "wronguser@test.com",
     "username": "wronguser",
     "password": "wrongpassword"
   }

@@ -3,8 +3,8 @@ module.exports = {
     // 1. Where to find feature files (Web by default)
     paths: ['features/web/**/*.feature'],
 
-    // 2. Load support files (steps & hooks)
-    require: ['features/support/**/*.ts'],
+    // 2. Load support files (hooks & steps from src/)
+    require: ['src/support/**/*.ts', 'src/steps/**/*.ts'],
 
     // 3. Load the TypeScript loader (so we can run .ts files)
     requireModule: ['ts-node/register'],
@@ -22,14 +22,14 @@ module.exports = {
   },
   mobile: {
     paths: ['features/mobile/**/*.feature'],
-    require: ['features/support/**/*.ts'],
+    require: ['src/support/**/*.ts', 'src/steps/**/*.ts'],
     requireModule: ['ts-node/register'],
     format: ['progress-bar', 'allure-cucumberjs/reporter'],
     formatOptions: { resultsDir: 'allure-results' }
   },
   api: {
     paths: ['features/api/**/*.feature'],
-    require: ['features/support/**/*.ts'],
+    require: ['src/support/**/*.ts', 'src/steps/**/*.ts'],
     requireModule: ['ts-node/register'],
     format: ['progress-bar', 'allure-cucumberjs/reporter'],
     formatOptions: { resultsDir: 'allure-results' }

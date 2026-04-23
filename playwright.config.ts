@@ -8,7 +8,10 @@ export default defineConfig({
   fullyParallel: true,
   retries: 0,
   workers: 1, // Set to 1 for clearer debugging logs
-  reporter: 'html',
+  reporter: [
+    ['html'],
+    ['json', { outputFile: './json-report/report.json' }]
+  ],
   
   use: {
     // 1. Run only on Desktop Chrome by default

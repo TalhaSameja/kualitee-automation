@@ -1,11 +1,19 @@
 import { APIRequestContext, request } from '@playwright/test';
+import { ENV } from '../config/environments';
 
+/**
+ * API Client
+ * 
+ * Centralized HTTP client for API testing.
+ * Uses environments.ts for base URL instead of reading process.env directly.
+ * Supports all standard HTTP methods for future-proofing.
+ */
 export class ApiClient {
     private requestContext!: APIRequestContext;
     private baseUrl: string;
 
     constructor() {
-        this.baseUrl = process.env.API_BASE_URL || 'https://kualitee-oi-uat.kualiteestaging.com/api/v2/';
+        this.baseUrl = ENV.apiBaseUrl;
     }
 
     async init() {
@@ -20,7 +28,8 @@ export class ApiClient {
         });
     }
 
-    // Helper wrappers to attach default behaviors
+    // ── HTTP Methods ────────────────────────────────────────
+
     async get(endpoint: string, options?: any) {
         return this.requestContext.get(endpoint, options);
     }
@@ -28,6 +37,20 @@ export class ApiClient {
     async post(endpoint: string, options?: any) {
         return this.requestContext.post(endpoint, options);
     }
+
+    async put(endpoint: string, options?: any) {
+        return this.requestContext.put(endpoint, options);
+    }
+
+    async patch(endpoint: string, options?: any) {
+        return this.requestContext.patch(endpoint, options);
+    }
+
+    async delete(endpoint: string, options?: any) {
+        return this.requestContext.delete(endpoint, options);
+    }
+
+    // ── Auth ────────────────────────────────────────────────
 
     async setAuthToken(token: string) {
         // Recreate the context with the authorization header
@@ -42,6 +65,8 @@ export class ApiClient {
             }
         });
     }
+
+    // ── Cleanup ─────────────────────────────────────────────
 
     async close() {
         if (this.requestContext) {
